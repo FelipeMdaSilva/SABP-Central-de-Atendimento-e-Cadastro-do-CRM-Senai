@@ -4,8 +4,16 @@ declare(strict_types=1);
 
 // Requisito 2: Busca por nome
 function buscarCliente(array $clientes, string $nome): ?array {
+    // 1. Remove espaços extras e converte o termo pesquisado para minúsculas
+    $termoLimpo = mb_strtolower(trim($nome));
+
     foreach ($clientes as $cliente) {
         if (mb_strtolower(trim($cliente['nome'])) === mb_strtolower(trim($nome))) {
+        // 2. Remove espaços extras e converte o nome do cliente cadastrado para minúsculas
+        $nomeCliente = mb_strtolower(trim($cliente['nome']));
+
+        // 3. Verifica se o texto pesquisado EXISTE DENTRO do nome cadastrado
+        if (str_contains($nomeCliente, $termoLimpo)) {
             return $cliente;
         }
     }
