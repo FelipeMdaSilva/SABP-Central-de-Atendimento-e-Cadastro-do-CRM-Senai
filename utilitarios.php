@@ -137,3 +137,4 @@ echo "===== RELATÓRIO FINAL =====<br>";
 echo "Total de clientes cadastrados: " . count($clientes) . "<br>";
 echo "Total de clientes ativos: " . contarClientesAtivos($clientes) . "<br>";
 echo "Maior contrato cadastrado: " . formatarMoeda(obterMaiorContrato($clientes)) . "<br>";
+?>
