@@ -3,23 +3,52 @@ declare(strict_types=1);
 
 require_once 'utilitarios.php';
 
-$clientes = [
+   $clientes = [
     [
-        "nome" => " ANA CLARA SILVA ",
+        "nome" => "  ANA CLARA SILVA ",
         "cpf" => "123.456.789-00",
-        "email" => "anaclara.siva@email.com",
-        "contrato" => 1500,00,
+        "email" => "ana.clara@email.com",
+        "contrato" => 1500.00,
         "ativo" => true
     ],
     [
-        "nome" => " CARLOS SOUZA ",
+        "nome" => "Carlos Souza",
         "cpf" => "987.654.321-00",
         "email" => "carlos.souza@email.com",
-        "contrato" => 850,00,
+        "contrato" => 850.50,
         "ativo" => false
     ],
+    [
+        "nome" => "Ricardo Teixeira",
+        "cpf" => "111.222.333-44",
+        "email" => "ricardo.teixeira@email.com",
+        "contrato" => 1200.50,
+        "ativo" => true
+    ],
+    [
+        "nome" => "Maria Silva",
+        "cpf" => "456.321.789-00",
+        "email" => "maria.silva@email.com",
+        "contrato" => 1050.00,
+        "ativo" => false
+    ]
 ];
+//  processa o cadastro quando o formulário é enviado
+$mensagemCadastro = '';
+$sucesso = false;  
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $novoNome = $_POST['nome'] ?? '';
+    $novoCpf = $_POST['cpf'] ?? '';
+    $novoEmail = $_POST['email'] ?? '';
+    $novoContrato = (float) ($_POST['contrato'] ?? 0);
 
+    $sucesso = cadastrarCliente($clientes, $novoNome, $novoCpf, $novoEmail, $novoContrato);
+    $mensagemCadastro = $sucesso
+        ? "Cliente \"$novoNome\" cadastrado com sucesso!"
+        : "Dados inválidos. Verifique nome, CPF, e-mail e valor do contrato.";
+}
+
+// Busca via GET (?busca=nome)
 $termoBusca = $_GET['busca'] ?? '';
 $clienteEncontrado = $termoBusca !== '' ? buscarCliente($clientes, $termoBusca) : null;
 
@@ -93,24 +122,30 @@ $clienteEncontrado = $termoBusca !== '' ? buscarCliente($clientes, $termoBusca) 
             <!-- SEÇÃO 3: Cadastro de novo cliente -->
              <div class="card">
                 <h2>Cadastrar Novo Cliente</h2>
-                <form method="post"></form>
+
+                <?php if ($mensagemCadastro !== ''): ?>
+            <p class="<?php echo $sucesso ? 'sucesso' : 'erro'; ?>"><?php echo $mensagemCadastro; ?></p>
+            <?php endif; ?>
+
+            <form method="post"></form>
                 <label>Nome: <input type="text" name="nome"></label><br>
                 <label>CPF: <input type="text" name="cpf"></label><br>
                 <label>E-mail: <input type="email" name="email"></label><br>
                 <label>Valor do Contrato: <input type="text" name="contrato"></label><br>
                 <button style="color: #3498db;" type="submit">Cadastrar</button>
         </form>
-        <!-- validarCPF() / validarEmail() entram aqui quando o POST for tratado -->
              </div>
 
              <!-- SEÇÃO 4: Relatório / Resumo financeiro -->
               <div class="card">
                 <h2>Relatório</h2>
                 <ul >
-                    <li>Total de Clientes: <?php echo count($clientes); ?> </li>
-                    <li>Clientes ativos:  <?php echo contarClientesAtivos($clientes); ?> </li>
-                    <li>Total de Contratos Ativos: <?php echo formatarMoeda(calcularTotalContratosAtivos($clientes)); ?> </li>
-                </ul>
+                   <li>Total de clientes: <?php echo count($clientes); ?></li>
+            <li>Clientes ativos: <?php echo contarClientesAtivos($clientes); ?></li>
+            <li>Total contratos ativos: <?php echo formatarMoeda(calcularTotalContratosAtivos($clientes)); ?></li>
+            <li>Média dos contratos: <?php echo formatarMoeda(calcularMediaContratos($clientes)); ?></li>
+            <li>Maior contrato: <?php echo formatarMoeda(obterMaiorContrato($clientes)); ?></li>
+        </ul>
               </div>
 </body>
 </html>
