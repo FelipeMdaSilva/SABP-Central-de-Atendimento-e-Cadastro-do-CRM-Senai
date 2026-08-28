@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 $clientes = [
     [
         "nome" => "  ANA CLARA SILVA ",
@@ -31,15 +32,17 @@ $clientes = [
     ]
 ];
 
+// Requisito 1: Listagem
 foreach ($clientes as $cliente) {
     echo "Nome: " . $cliente['nome'] . "<br>";
     echo "CPF: " . $cliente['cpf'] . "<br>";
     echo "E-mail: " . $cliente['email'] . "<br>";
     echo "Valor do Contrato: R$ " . $cliente['contrato'] . "<br>";
-    echo "Situação: " . ($cliente['ativo'] ? "Ativo" : "Inativo") . "<br> <br>";
+    echo "Situação: " . ($cliente['ativo'] ? "Ativo" : "Inativo") . "<br><br>";
 }
 
-function buscarCliente (array $clientes, string $nome): ?array {
+// Requisito 2: Busca por nome
+function buscarCliente(array $clientes, string $nome): ?array {
     foreach ($clientes as $cliente) {
         if ($cliente['nome'] == $nome) {
             return $cliente;
@@ -48,44 +51,46 @@ function buscarCliente (array $clientes, string $nome): ?array {
     return null;
 }
 
-function cadastrarCliente (array $lista, string $nome, string $cpf, string $email, float $contrato) : bool {
-    if (!$nome || !$cpf || !$email || $contrato < 0) {
+// Requisito 3: Cadastro com validação (Corrigido o & e as chaves)
+function cadastrarCliente(array &$lista, string $nome, string $cpf, string $email, float $contrato): bool {
+    if (!$nome || !$cpf || !$email || $contrato <= 0) {
         echo "Dados inválidos! <br>";
         return false;
-}
-
+    }
 
     $lista[] = [
-    "nome" => $nome,
-    "cpf" => $cpf,
-    "email" => $email,
-    "contrato" => $contrato,
-    "ativo" => true
+        "nome" => $nome,
+        "cpf" => $cpf,
+        "email" => $email,
+        "contrato" => $contrato,
+        "ativo" => true
     ];
-    echo "Cliente $nome cadastrado!";
+    
+    echo "Cliente $nome cadastrado!<br>";
     return true;
 }
 
-
+// Requisito 4: Limpeza de dados
 function limparCPF(string $cpf): string {
     return str_replace(['.', '-'], '', $cpf);
-};
+}
 
 function limparNome(string $nome): string {
     return trim($nome);
-};
+}
 
+// Requisito 5: Formatação
 function formatarNome(string $nome): string {
     return mb_convert_case(trim($nome), MB_CASE_TITLE, "UTF-8");
-};
+}
 
 function formatarMoeda(float $valor): string {
     return "R$ " . number_format($valor, 2, ',', '.');
-};
+}
 
-function calcularTotalContratosAtivos(array $clientes): float 
-{
-    $total = 0;
+// Requisito 6: Resumo financeiro
+function calcularTotalContratosAtivos(array $clientes): float {
+    $total = 0.0;
 
     foreach ($clientes as $cliente) {
         if ($cliente['ativo']) {
@@ -93,27 +98,26 @@ function calcularTotalContratosAtivos(array $clientes): float
         }
     }
     return $total;
-};
+}
 
-function aplicarReajuste(float &$contrato, float $percentual): void
-{
+// Requisito 7: Alteração por referência
+function aplicarReajuste(float &$contrato, float $percentual): void {
     $contrato += $contrato * ($percentual / 100);
-};
+}
 
-function contarClientesAtivos(array $clientes): int
-{
+// Requisito 8: Funções do Relatório Final (Corrigida a verificação no if)
+function contarClientesAtivos(array $clientes): int {
     $ativos = 0;
     foreach ($clientes as $cliente) {
-        if ($cliente=['ativo']) {
+        if ($cliente['ativo']) {
             $ativos++;
         }
     }
     return $ativos;
-};
+}
 
-function obterMaiorContrato(array $clientes): float
-{
-    if(empty($clientes)) {
+function obterMaiorContrato(array $clientes): float {
+    if (empty($clientes)) {
         return 0.0;
     }
 
@@ -125,12 +129,11 @@ function obterMaiorContrato(array $clientes): float
         }
     }
 
-return $maior;
+    return $maior;
 }
 
+// Exibição do Relatório Final (Formatado)
 echo "===== RELATÓRIO FINAL =====<br>";
-echo "Total de clientes cadastrados" . count($clientes) . "<br>";
-echo "Total de clientes ativos" . contarClientesAtivos($clientes) . "<br>";
-echo "Maior contrato cadastrado" . formatarMoeda(obterMaiorContrato($clientes)) . "<br>";
-
-?>
+echo "Total de clientes cadastrados: " . count($clientes) . "<br>";
+echo "Total de clientes ativos: " . contarClientesAtivos($clientes) . "<br>";
+echo "Maior contrato cadastrado: " . formatarMoeda(obterMaiorContrato($clientes)) . "<br>";
