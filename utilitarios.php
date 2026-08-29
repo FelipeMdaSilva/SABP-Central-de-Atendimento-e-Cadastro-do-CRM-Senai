@@ -1,72 +1,100 @@
 <?php
 declare(strict_types=1);
+/** Remove espaços desnecessários no início/fim do nome. */
+function limparNome(string $nome): string
+{
+    return trim($nome);
+}
+/** Remove pontuação do CPF (ponto, traço e espaço), deixando só números. */
+function limparCPF(string $cpf): string
+{
+    // uso explícito de str_replace, conforme requisito técnico
+    return str_replace(['.', '-', ' '], '', trim($cpf));
+}
 
+/** Verifica se o CPF (já limpo) tem 11 dígitos numéricos. */
+function validarCPF(string $cpf): bool
+{
+    $cpfLimpo = limparCPF($cpf);
 
-// Requisito 2: Busca por nome
-function buscarCliente(array $clientes, string $nome): ?array {
-    // 1. Remove espaços extras e converte o termo pesquisado para minúsculas
-    $termoLimpo = mb_strtolower(trim($nome));
+    if (strlen($cpfLimpo) !== 11) {
+        return false;
+    } elseif (!ctype_digit($cpfLimpo)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/** Verifica se o e-mail tem um formato válido. */
+function validarEmail(string $email): bool
+{
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+/**
+ * Cadastra um novo cliente na lista, validando todos os campos.
+ * Retorna true se o cadastro foi realizado, false se os dados forem inválidos.
+ */
+function cadastrarCliente(array &$clientes, string $nome, string $cpf, string $email, float $contrato): bool
+{
+    $nomeLimpo = limparNome($nome);
+
+    if ($nomeLimpo === '') {
+        return false;
+    } elseif (!validarCPF($cpf)) {
+        return false;
+    } elseif (!validarEmail($email)) {
+        return false;
+    } elseif ($contrato <= 0) {
+        return false;
+    }
+
+    $clientes[] = [
+        "nome"     => formatarNome($nomeLimpo),
+        "cpf"      => limparCPF($cpf),
+        "email"    => $email,
+        "contrato" => $contrato,
+        "ativo"    => true,
+    ];
+
+    return true;
+}
+
+/** Busca um cliente pelo nome (busca parcial, sem diferenciar maiúsculas/minúsculas). */
+function buscarCliente(array $clientes, string $nome): ?array
+{
+    $termoLimpo = strtolower(trim($nome));
+
+    if ($termoLimpo === '') {
+        return null;
+    }
 
     foreach ($clientes as $cliente) {
-        if (mb_strtolower(trim($cliente['nome'])) === mb_strtolower(trim($nome))) {
-        // 2. Remove espaços extras e converte o nome do cliente cadastrado para minúsculas
-        $nomeCliente = mb_strtolower(trim($cliente['nome']));
+        $nomeCliente = strtolower(trim($cliente['nome']));
 
-        // 3. Verifica se o texto pesquisado EXISTE DENTRO do nome cadastrado
         if (str_contains($nomeCliente, $termoLimpo)) {
             return $cliente;
         }
     }
+
     return null;
 }
 
-// Requisito 3: Cadastro com validação
-
-function validarCPF(string $cpf): bool {
-    $cpfLimpo = limparCPF($cpf);
-    return strlen($cpfLimpo) === 11 && ctype_digit($cpfLimpo);
+/** Padroniza o nome em formato "Título" (primeira letra de cada palavra maiúscula). */
+function formatarNome(string $nome): string
+{
+    $nomeLimpo = trim($nome);
+    return ucwords(strtolower($nomeLimpo));
 }
 
-function validarEmail(string $email): bool {
-    return str_contains($email, '@') && str_contains($email, '.');
-}
-
-function cadastrarCliente(array &$lista, string $nome, string $cpf, string $email, float $contrato): bool {
-    if (!$nome || !$cpf || !$email || $contrato <= 0) {
-        return false;
-    }
-
-    $lista[] = [
-        "nome" => $nome,
-        "cpf" => $cpf,
-        "email" => $email,
-        "contrato" => $contrato,
-        "ativo" => true
-    ];
-    
-    return true;
-}
-
-// Requisito 4: Limpeza de dados
-function limparCPF(string $cpf): string {
-    return str_replace(['.', '-'], '', $cpf);
-}
-
-function limparNome(string $nome): string {
-    return trim($nome);
-}
-
-// Requisito 5: Formatação
-function formatarNome(string $nome): string {
-    return mb_convert_case(trim($nome), MB_CASE_TITLE, "UTF-8");
-}
-
-function formatarMoeda(float $valor): string {
+/** Formata um valor float no padrão de moeda brasileira. */
+function formatarMoeda(float $valor): string
+{
     return "R$ " . number_format($valor, 2, ',', '.');
 }
-
-// Requisito 6: Resumo financeiro
-function calcularTotalContratosAtivos(array $clientes): float {
+/** Soma o valor dos contratos apenas dos clientes ativos. */
+function calcularTotalContratosAtivos(array $clientes): float
+{
     $total = 0.0;
 
     foreach ($clientes as $cliente) {
@@ -74,39 +102,29 @@ function calcularTotalContratosAtivos(array $clientes): float {
             $total += $cliente['contrato'];
         }
     }
+
     return $total;
 }
 
-
-
-// Requisito 7: Alteração por referência
-function aplicarReajuste(float &$contrato, float $percentual): void {
-    $contrato += $contrato * ($percentual / 100);
-}
-
-// Requisito 8: Relatório Final 
-function contarClientesAtivos(array $clientes): int {
-    $ativos = 0;
-    foreach ($clientes as $cliente) {
-        if ($cliente['ativo']) {
-            $ativos++;
-        }
-    }
-    return $ativos;
-}
-//Média dos contratos 
-function calcularMediaContratos(array $clientes): float {
-    if (empty($clientes)) {
+/** Calcula a média dos valores de contrato de todos os clientes. */
+function calcularMediaContratos(array $clientes): float
+{
+    if (count($clientes) === 0) {
         return 0.0;
     }
+
     $soma = 0.0;
     foreach ($clientes as $cliente) {
         $soma += $cliente['contrato'];
     }
+
     return $soma / count($clientes);
 }
-function obterMaiorContrato(array $clientes): float {
-    if (empty($clientes)) {
+
+/** Retorna o maior valor de contrato entre todos os clientes. */
+function obterMaiorContrato(array $clientes): float
+{
+    if (count($clientes) === 0) {
         return 0.0;
     }
 
@@ -121,4 +139,41 @@ function obterMaiorContrato(array $clientes): float {
     return $maior;
 }
 
+/** Conta quantos clientes estão marcados como ativos. */
+function contarClientesAtivos(array $clientes): int
+{
+    $ativos = 0;
 
+    foreach ($clientes as $cliente) {
+        if ($cliente['ativo']) {
+            $ativos++;
+        }
+    }
+
+    return $ativos;
+}
+
+//  * Aplica um reajuste percentual sobre um valor de contrato,
+//  * alterando diretamente a variável original (passagem por referência).
+function aplicarReajuste(float &$contrato, float $percentual): void
+{
+    $contrato += $contrato * ($percentual / 100);
+}
+/**
+ * Localiza um cliente pelo CPF dentro da lista e aplica o reajuste
+ */
+function reajustarContratoCliente(array &$clientes, string $cpfBusca, float $percentual): bool
+{
+    $cpfLimpo = limparCPF($cpfBusca);
+
+    foreach ($clientes as &$cliente) {
+        if (limparCPF($cliente['cpf']) === $cpfLimpo) {
+            aplicarReajuste($cliente['contrato'], $percentual);
+            unset($cliente);
+            return true;
+        }
+    }
+    unset($cliente);
+
+    return false;
+}
