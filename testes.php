@@ -7,6 +7,8 @@ require_once 'utilitarios.php';
 $clientes = [
     ["nome" => " Ana Clara Silva ", "cpf" => "123.456.789-00", "email" => "ana@email.com", "contrato" => 1500.00, "ativo" => true],
     ["nome" => "Carlos Souza", "cpf" => "987.654.321-00", "email" => "carlos@email.com", "contrato" => 850.50, "ativo" => false],
+    ["nome" => "Ricardo Teixeira", "cpf" => "111.222.333-44", "email" => "ricardo.teixeira@email.com", "contrato" => 1200.50, "ativo" => true],
+    ["nome" => "Maria Silva", "cpf" => "456.321.789-00", "email" => "maria.silva@email.com", "contrato" => 1050.00, "ativo" => false]
 ];
 
 echo "<pre>";
